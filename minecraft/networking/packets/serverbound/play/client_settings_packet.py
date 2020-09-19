@@ -1,5 +1,5 @@
-from minecraft.networking.packets import Packet
-from minecraft.networking.types import (
+from ....packets import Packet
+from ....types import (
     String, Byte, VarInt, Boolean, UnsignedByte, Enum, BitFieldEnum,
     AbsoluteHand
 )

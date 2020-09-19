@@ -1,6 +1,6 @@
-from minecraft.networking.packets import Packet
+from ... import Packet
 
-from minecraft.networking.types import (
+from ....types import (
     String, Long
 )
 

@@ -1,6 +1,6 @@
 from .packet import Packet
 
-from minecraft.networking.types import (
+from ..types import (
     VarInt, Long
 )
 

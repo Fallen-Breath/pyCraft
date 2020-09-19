@@ -1,7 +1,7 @@
 import pynbt
 
-from minecraft.networking.packets import Packet
-from minecraft.networking.types import (
+from ... import Packet
+from ....types import (
     NBT, Integer, Boolean, UnsignedByte, String, Byte, Long, VarInt,
     PrefixedArray, Difficulty, GameMode, Dimension,
 )

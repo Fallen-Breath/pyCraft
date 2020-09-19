@@ -1,6 +1,6 @@
-from minecraft.networking.packets import Packet
+from ....packets import Packet
 
-from minecraft.networking.types import (
+from ....types import (
     VarInt, Integer, String, MutableRecord
 )
 

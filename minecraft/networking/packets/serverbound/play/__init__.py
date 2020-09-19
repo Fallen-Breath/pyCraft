@@ -1,11 +1,11 @@
-from minecraft.networking.packets import (
+from ... import (
     Packet, AbstractKeepAlivePacket, AbstractPluginMessagePacket
 )
 
-from minecraft.networking.types import (
+from ....types import (
     Double, Float, Boolean, VarInt, String, Byte, Position, Enum,
     RelativeHand, BlockFace, Vector, Direction, PositionAndLook,
-    multi_attribute_alias,
+    multi_attribute_alias, UUID,
 )
 
 from .client_settings_packet import ClientSettingsPacket
@@ -259,3 +259,19 @@ class UseItemPacket(Packet):
         {'hand': VarInt}])
 
     Hand = RelativeHand
+
+
+# PCRC SpectatePacket
+class SpectatePacket(Packet):
+    @staticmethod
+    def get_id(context):
+        return 0x2D if context.protocol_version >= 751 else \
+               0x2C if context.protocol_version >= 736 else \
+               0x2B if context.protocol_version >= 578 else \
+               0x2B if context.protocol_version >= 578 else \
+               0x1E
+
+    packet_name = "Spectate"
+
+    get_definition = staticmethod(lambda context: [
+        {'target': UUID}])

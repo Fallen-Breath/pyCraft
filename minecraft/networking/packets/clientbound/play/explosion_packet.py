@@ -1,7 +1,7 @@
-from minecraft.networking.types import (
+from ....types import (
     Vector, Float, Byte, Integer, PrefixedArray, multi_attribute_alias, Type,
 )
-from minecraft.networking.packets import Packet
+from ... import Packet
 
 
 class ExplosionPacket(Packet):

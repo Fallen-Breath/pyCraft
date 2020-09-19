@@ -1,8 +1,8 @@
-from minecraft.networking.types import (
+from ....types import (
     VarInt, Double, Boolean, OriginPoint, Vector, multi_attribute_alias
 )
 
-from minecraft.networking.packets import Packet
+from ... import Packet
 
 
 class FacePlayerPacket(Packet):

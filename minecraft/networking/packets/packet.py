@@ -1,7 +1,7 @@
 from zlib import compress
 
 from .packet_buffer import PacketBuffer
-from minecraft.networking.types import (
+from ..types import (
     VarInt, Enum, overridable_property,
 )
 
@@ -146,7 +146,7 @@ class Packet(object):
 
     @classmethod
     def field_enum(cls, field, context=None):
-        """ The subclass of 'minecraft.networking.types.Enum' associated with
+        """ The subclass of 'pycraft.networking.types.Enum' associated with
             this field, or None if there is no such class.
         """
         enum_name = ''.join(s.capitalize() for s in field.split('_'))

@@ -1,5 +1,5 @@
-from minecraft.networking.packets import Packet
-from minecraft.networking.types import (
+from ....packets import Packet
+from ....types import (
     Type, VarInt, VarLong, UnsignedLong, Integer, UnsignedByte, Position,
     Vector, MutableRecord, PrefixedArray, Boolean, attribute_alias,
     multi_attribute_alias,

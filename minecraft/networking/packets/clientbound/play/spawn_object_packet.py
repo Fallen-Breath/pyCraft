@@ -1,7 +1,7 @@
-from minecraft.networking.packets import Packet
-from minecraft.networking.types.utility import descriptor
+from ... import Packet
+from ....types.utility import descriptor
 
-from minecraft.networking.types import (
+from ....types import (
     VarInt, UUID, Byte, Double, Integer, Angle, Short, Enum, Vector,
     Direction, PositionAndLook, attribute_alias, multi_attribute_alias,
 )

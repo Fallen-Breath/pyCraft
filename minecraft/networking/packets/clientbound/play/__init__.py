@@ -1,8 +1,8 @@
-from minecraft.networking.packets import (
+from ... import (
     Packet, AbstractKeepAlivePacket, AbstractPluginMessagePacket
 )
 
-from minecraft.networking.types import (
+from ....types import (
     FixedPoint, Integer, Angle, UnsignedByte, Byte, Boolean, UUID, Short,
     VarInt, Double, Float, String, Enum, Difficulty, Long, Vector, Direction,
     PositionAndLook, multi_attribute_alias, attribute_transform,

@@ -1,6 +1,5 @@
-from minecraft.networking.packets import Packet
-
-from minecraft.networking.types import (
+from ... import Packet
+from ....types import (
     VarInt, String, UnsignedShort
 )
 

@@ -1,3 +1,4 @@
+import copy
 from collections import deque
 from threading import RLock
 import zlib
@@ -56,6 +57,7 @@ class Connection(object):
         allowed_versions=None,
         handle_exception=None,
         handle_exit=None,
+        recorder=None,  # PCRC
     ):
         """Sets up an instance of this object to be able to connect to a
         minecraft server.
@@ -65,7 +67,7 @@ class Connection(object):
 
         :param address: address of the server to connect to
         :param port(int): port of the server to connect to
-        :param auth_token: :class:`minecraft.authentication.AuthenticationToken`
+        :param auth_token: :class:`pycraft.authentication.AuthenticationToken`
                            object. If None, no authentication is attempted and
                            the server is assumed to be running in offline mode.
         :param username: Username string; only applicable in offline mode.
@@ -111,6 +113,10 @@ class Connection(object):
         self.outgoing_packet_listeners = []
         self.early_outgoing_packet_listeners = []
         self._exception_handlers = []
+
+        # PCRC fields
+        self.running_networking_thread = 0
+        self.recorder = recorder
 
         def proto_version(version):
             if isinstance(version, str):
@@ -192,7 +198,7 @@ class Connection(object):
         """
         Shorthand decorator to register a function as a packet listener.
 
-        Wraps :meth:`minecraft.networking.connection.register_packet_listener`
+        Wraps :meth:`pycraft.networking.connection.register_packet_listener`
         :param packet_types: Packet types to listen for.
         :param kwds: Keyword arguments for `register_packet_listener`
         """
@@ -217,7 +223,7 @@ class Connection(object):
         Registers a listener method which will be notified when a packet of
         a selected type is received.
 
-        If :class:`minecraft.networking.connection.IgnorePacket` is raised from
+        If :class:`pycraft.networking.connection.IgnorePacket` is raised from
         within this method, no subsequent handlers will be called. If
         'early=True', this has the additional effect of preventing the default
         in-built action; this could break the internal state of the
@@ -364,6 +370,12 @@ class Connection(object):
             # ProtocolSupport plugin, use it to determine the correct response.
             self.context.protocol_version = max(self.allowed_proto_versions)
 
+            # PCRC modified the value to default_proto_version if there are multiple allow version
+            if self.recorder is not None:
+                self.recorder.logger.info('Allow versions of the server: {}'.format(self.allowed_proto_versions))
+            if len(self.allowed_proto_versions) > 1:
+                self.context.protocol_version = self.default_proto_version
+
             self.spawned = False
             self._connect()
             if len(self.allowed_proto_versions) == 1:
@@ -378,6 +390,9 @@ class Connection(object):
                     login_start_packet.name = self.username
                 self.write_packet(login_start_packet)
                 self.reactor = LoginReactor(self)
+
+                if self.recorder is not None:
+                    self.recorder.on_protocol_version_decided(self.allowed_proto_versions.copy().pop())  # PCRC
             else:
                 # Determine the server's protocol version by first performing a
                 # status query.
@@ -538,6 +553,7 @@ class NetworkingThread(threading.Thread):
         self.previous_thread = previous
 
     def run(self):
+        self.connection.running_networking_thread += 1  # PCRC
         try:
             if self.previous_thread is not None:
                 if self.previous_thread.is_alive():
@@ -553,6 +569,7 @@ class NetworkingThread(threading.Thread):
         finally:
             with self.connection._write_lock:
                 self.connection.networking_thread = None
+            self.connection.running_networking_thread -= 1  # PCRC
 
     def _run(self):
         while not self.interrupt:
@@ -642,6 +659,7 @@ class PacketReactor(object):
                     packet_data.send(decompressed_packet)
                     packet_data.reset_cursor()
 
+            packet_raw = copy.deepcopy(packet_data.bytes.getvalue())  # PCRC storing raw data
             packet_id = VarInt.read(packet_data)
 
             # If we know the structure of the packet, attempt to parse it
@@ -654,6 +672,7 @@ class PacketReactor(object):
                 packet = packets.Packet()
                 packet.context = self.connection.context
                 packet.id = packet_id
+            packet.raw_data = packet_raw  # PCRC storing raw data
             return packet
         else:
             return None
@@ -726,6 +745,7 @@ class LoginReactor(PacketReactor):
 
         elif packet.packet_name == "login success":
             self.connection.reactor = PlayingReactor(self.connection)
+            self.connection.recorder.start_recording()
 
         elif packet.packet_name == "set compression":
             self.connection.options.compression_threshold = packet.threshold
@@ -755,6 +775,7 @@ class PlayingReactor(PacketReactor):
                 teleport_confirm = serverbound.play.TeleportConfirmPacket()
                 teleport_confirm.teleport_id = packet.teleport_id
                 self.connection.write_packet(teleport_confirm)
+            # PCRC remove else
             position_response = serverbound.play.PositionAndLookPacket()
             position_response.x = packet.x
             position_response.feet_y = packet.y

@@ -1,6 +1,6 @@
-from minecraft.networking.packets import Packet
+from ... import Packet
 
-from minecraft.networking.types import (
+from ....types import (
     VarInt, String, VarIntPrefixedByteArray, TrailingByteArray, UUID,
 )
 
@@ -80,7 +80,7 @@ class PluginRequestPacket(Packet):
           (1) has the keyword argument 'early=True' set when calling
               'register_packet_listener'; and
 
-          (2) raises 'minecraft.networking.connection.IgnorePacket' after
+          (2) raises 'pycraft.networking.connection.IgnorePacket' after
               sending a corresponding 'PluginResponsePacket'.
 
         Otherwise, one 'PluginRequestPacket' may result in multiple responses,
